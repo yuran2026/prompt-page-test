@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>模板库 - 全域AI提示词</title>
+  <link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+  <!-- 顶部导航 -->
+  <div class="navbar">
+    <div style="width:36px"></div>
+    <div class="navbar-title">模板词库</div>
+    <div style="width:36px"></div>
+  </div>
+
+  <!-- 搜索栏（粘性） -->
+  <div class="search-bar">
+    <div class="search-input-wrap">
+      <svg class="search-icon-svg" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="search" id="searchInput" class="search-input" placeholder="搜索提示词模板…" 
+             oninput="onSearchInput()" onkeydown="onSearchKeydown(event)" autocomplete="off" enterkeyhint="search">
+      <span class="search-clear" id="searchClear" onclick="clearSearch()">✕</span>
+    </div>
+    <!-- 敏感词提示 -->
+    <div class="sensitive-tip" id="sensitiveTip">该词汇包含不当内容，请修改后重试</div>
+  </div>
+
+  <!-- 分类胶囊滑动 -->
+  <div class="category-scroll" id="catScroll"></div>
+
+  <!-- 排序栏 -->
+  <div class="sort-bar">
+    <button class="sort-btn active" id="sortNew" onclick="setSortMode('new')">最新</button>
+    <button class="sort-btn" id="sortHot" onclick="setSortMode('hot')">最热</button>
+    <span class="result-count" id="resultCount"></span>
+  </div>
+
+  <!-- 模板列表 -->
+  <div class="page-content" style="padding-top:0">
+    <div style="height:12px"></div>
+    <div class="templates-list" id="templatesList"></div>
+
+    <!-- 搜索历史（初始显示） -->
+    <div id="searchHistorySection" class="hot-search-section" style="display:none">
+      <div class="section-title" style="justify-content:space-between">
+        <span style="display:flex;align-items:center;gap:6px">
+          <svg class="section-title-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          搜索历史
+        </span>
+        <span style="font-size:12px;color:var(--text-hint);cursor:pointer" onclick="clearSearchHistory()">清空</span>
+      </div>
+      <div class="hot-tags" id="historyTags"></div>
+    </div>
+
+    <!-- 热门搜索 -->
+    <div id="hotSearchSection" class="hot-search-section">
+      <div class="section-title">
+        <svg class="section-title-icon" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        热门搜索
+      </div>
+      <div class="hot-tags" id="hotTags"></div>
+    </div>
+
+    <!-- 空状态 -->
+    <div id="emptyState" class="empty-state" style="display:none">
+      <svg class="empty-svg" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        <line x1="8" y1="11" x2="14" y2="11"/>
+      </svg>
+      <div class="empty-title">没有找到相关模板</div>
+      <div class="empty-desc">换个关键词试试，或浏览全部分类</div>
+    </div>
+
+    <!-- 加载更多 -->
+    <div id="loadMoreWrap" style="text-align:center;padding:16px;display:none">
+      <button class="btn btn-outline btn-sm" onclick="loadMore()">加载更多</button>
+    </div>
+
+    <!-- Banner广告（仅列表底部） -->
+    <div class="ad-banner" id="adBanner" style="display:none">
+      <span class="ad-tag">广告</span>
+      <span class="ad-text">精选AI工具推荐 · 效率提升10倍</span>
+      <span class="ad-arrow">›</span>
+    </div>
+
+    <!-- 合规底部 -->
+    <div class="compliance-footer">
+      <a href="privacy.html">《隐私政策》</a>
+      <a href="disclaimer.html">《免责声明》</a>
+      <a href="rules.html">《使用规则》</a>
+    </div>
+  </div>
+
+  <!-- 底部TabBar -->
+  <div class="tabbar">
+    <div class="tab-item" data-page="home">
+      <div class="tab-icon-wrap"><svg class="tab-svg" viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg></div>
+      <div class="tab-label">首页</div>
+    </div>
+    <div class="tab-item" data-page="search">
+      <div class="tab-icon-wrap"><svg class="tab-svg" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg></div>
+      <div class="tab-label">模板库</div>
+    </div>
+    <div class="tab-item" data-page="editor">
+      <div class="tab-icon-wrap"><svg class="tab-svg" viewBox="0 0 24 24"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></div>
+      <div class="tab-label">编辑器</div>
+    </div>
+    <div class="tab-item" data-page="polish">
+      <div class="tab-icon-wrap"><svg class="tab-svg" viewBox="0 0 24 24"><path d="M12 2L9 9H2l6 4.5-2.5 7.5L12 16.5 18.5 21 16 13.5 22 9h-7z"/></svg></div>
+      <div class="tab-label">AI润色</div>
+    </div>
+    <div class="tab-item" data-page="profile">
+      <div class="tab-icon-wrap"><svg class="tab-svg" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+      <div class="tab-label">我的</div>
+    </div>
+  </div>
+
+  <script src="../data/templates.js"></script>
+  <script src="../js/app.js"></script>
+  <script>
+    let currentCat = 'all';
+    let currentSort = 'new';
+    let currentKeyword = '';
+    let pageSize = 15;
+    let currentPage = 1;
+    let allFiltered = [];
+
+    const HOT_SEARCHES = ['小红书文案', '职场邮件', '产品描述', '朋友圈', '学术润色', '短视频脚本', '求职简历', '创意广告'];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initTabBar('search');
+
+      // URL参数
+      const catParam = APP.getParam('cat');
+      const sortParam = APP.getParam('sort');
+      if (catParam) currentCat = catParam;
+      if (sortParam) currentSort = sortParam;
+
+      renderCatChips();
+      renderHotTags();
+      renderHistoryTags();
+      doRender();
+    });
+
+    function renderCatChips() {
+      const scroll = document.getElementById('catScroll');
+      const cats = [{ id: 'all', name: '全部' }, ...TEMPLATE_DB.categories];
+      scroll.innerHTML = cats.map(c => `
+        <div class="cat-chip ${c.id === currentCat ? 'active' : ''}" 
+             onclick="setCat('${c.id}')">${escHtml(c.name)}</div>
+      `).join('');
+    }
+
+    function renderHotTags() {
+      document.getElementById('hotTags').innerHTML = HOT_SEARCHES.map(kw => `
+        <div class="hot-tag tap-feedback" onclick="setKeyword('${escHtml(kw)}')">${escHtml(kw)}</div>
+      `).join('');
+    }
+
+    function renderHistoryTags() {
+      const history = APP.searchHistory.getAll();
+      const section = document.getElementById('searchHistorySection');
+      if (history.length === 0) { section.style.display = 'none'; return; }
+      section.style.display = '';
+      document.getElementById('historyTags').innerHTML = history.map(kw => `
+        <div class="hot-tag tap-feedback" onclick="setKeyword('${escHtml(kw)}')">${escHtml(kw)}</div>
+      `).join('');
+    }
+
+    function setCat(catId) {
+      currentCat = catId;
+      currentPage = 1;
+      renderCatChips();
+      doRender();
+    }
+
+    function setSortMode(mode) {
+      currentSort = mode;
+      document.getElementById('sortNew').classList.toggle('active', mode === 'new');
+      document.getElementById('sortHot').classList.toggle('active', mode === 'hot');
+      currentPage = 1;
+      doRender();
+    }
+
+    function onSearchInput() {
+      const val = document.getElementById('searchInput').value;
+      currentKeyword = val;
+      document.getElementById('searchClear').classList.toggle('show', val.length > 0);
+
+      const sensitive = APP.checkSensitive(val);
+      const tip = document.getElementById('sensitiveTip');
+      if (sensitive) {
+        tip.classList.add('show');
+        return;
+      } else {
+        tip.classList.remove('show');
+      }
+
+      currentPage = 1;
+      doRender();
+    }
+
+    function onSearchKeydown(e) {
+      if (e.key === 'Enter') {
+        e.target.blur();
+        if (currentKeyword.trim() && !APP.checkSensitive(currentKeyword)) {
+          APP.searchHistory.add(currentKeyword.trim());
+          renderHistoryTags();
+        }
+      }
+    }
+
+    function clearSearch() {
+      document.getElementById('searchInput').value = '';
+      currentKeyword = '';
+      document.getElementById('searchClear').classList.remove('show');
+      document.getElementById('sensitiveTip').classList.remove('show');
+      currentPage = 1;
+      doRender();
+    }
+
+    function setKeyword(kw) {
+      document.getElementById('searchInput').value = kw;
+      currentKeyword = kw;
+      document.getElementById('searchClear').classList.add('show');
+      currentPage = 1;
+      APP.searchHistory.add(kw);
+      renderHistoryTags();
+      doRender();
+    }
+
+    function clearSearchHistory() {
+      APP.searchHistory.clear();
+      renderHistoryTags();
+    }
+
+    function doRender() {
+      allFiltered = filterTemplates(TEMPLATE_DB.templates, {
+        categoryId: currentCat,
+        keyword: currentKeyword,
+        sortMode: currentSort
+      });
+
+      const hasSearch = currentKeyword.trim().length > 0;
+      document.getElementById('hotSearchSection').style.display = hasSearch ? 'none' : '';
+      renderHistoryTags();
+      if (!hasSearch) document.getElementById('searchHistorySection').style.display = APP.searchHistory.getAll().length ? '' : 'none';
+
+      const list = document.getElementById('templatesList');
+      const empty = document.getElementById('emptyState');
+      const resultCount = document.getElementById('resultCount');
+
+      resultCount.textContent = `共 ${allFiltered.length} 个`;
+
+      if (allFiltered.length === 0) {
+        list.innerHTML = '';
+        empty.style.display = '';
+        document.getElementById('loadMoreWrap').style.display = 'none';
+        document.getElementById('adBanner').style.display = 'none';
+        return;
+      }
+
+      empty.style.display = 'none';
+      const sliced = allFiltered.slice(0, pageSize * currentPage);
+      list.innerHTML = sliced.map(t => renderTemplateCard(t)).join('');
+
+      const hasMore = sliced.length < allFiltered.length;
+      document.getElementById('loadMoreWrap').style.display = hasMore ? '' : 'none';
+      document.getElementById('adBanner').style.display = !APP.member.isActive() ? '' : 'none';
+    }
+
+    function loadMore() {
+      currentPage++;
+      const list = document.getElementById('templatesList');
+      const start = pageSize * (currentPage - 1);
+      const end = pageSize * currentPage;
+      const more = allFiltered.slice(start, end).map(t => renderTemplateCard(t)).join('');
+      list.insertAdjacentHTML('beforeend', more);
+      const hasMore = end < allFiltered.length;
+      document.getElementById('loadMoreWrap').style.display = hasMore ? '' : 'none';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AI智能润色 - 全域AI提示词</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <style>
+    .compare-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 0 16px 12px;
+    }
+    .compare-box {
+      background: var(--bg-global);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      border: 1.5px solid var(--border);
+    }
+    .compare-box-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-hint);
+      margin-bottom: 8px;
+    }
+    .compare-box-text {
+      font-size: 12px;
+      color: var(--text-sub);
+      line-height: 1.7;
+      max-height: 110px;
+      overflow-y: auto;
+    }
+    .polish-btn-bar {
+      padding: 0 16px 12px;
+    }
+  </style>
+</head>
+<body>
+  <!-- 顶部导航 -->
+  <div class="navbar">
+    <div class="navbar-back" id="backBtn">
+      <svg class="nav-icon" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </div>
+    <div class="navbar-title">AI智能润色</div>
+    <div style="width:36px"></div>
+  </div>
+
+  <!-- 合规提示栏（固定，永久，不可关闭） -->
+  <div class="polish-notice-bar">
+    <svg class="polish-notice-icon" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    <span>温馨提示：本功能仅优化文本语序，不生成内容，内容由用户自行负责</span>
+  </div>
+
+  <div class="page-content" style="padding-top:0">
+
+    <!-- 使用次数栏 -->
+    <div class="usage-counter">
+      <div class="usage-left">
+        今日剩余：
+        <span class="usage-count" id="usageCount">-</span>
+        <span id="usageSuffix">次</span>
+      </div>
+      <div id="adBtnWrap" style="display:none">
+        <button class="watch-ad-btn tap-feedback" onclick="watchAd()">
+          <svg style="width:14px;height:14px;stroke:var(--primary-dark);fill:none;stroke-width:2;stroke-linecap:round" viewBox="0 0 24 24">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+          看广告+1次
+        </button>
+      </div>
+    </div>
+
+    <!-- 润色风格 -->
+    <div style="padding:12px 16px 4px;font-size:13px;font-weight:700;color:var(--text-hint)">选择润色风格</div>
+    <div class="style-tabs">
+      <div class="style-tab active" data-style="simple" onclick="setStyle('simple')">简洁版</div>
+      <div class="style-tab" data-style="detailed" onclick="setStyle('detailed')">详细版</div>
+      <div class="style-tab" data-style="professional" onclick="setStyle('professional')">专业版</div>
+      <div class="style-tab" data-style="colloquial" onclick="setStyle('colloquial')">口语版</div>
+    </div>
+
+    <!-- 输入区 -->
+    <div style="padding:0 16px 10px">
+      <div style="font-size:13px;font-weight:700;color:var(--text-hint);margin-bottom:8px">输入原始提示词</div>
+      <textarea id="polishInput" class="editor-textarea"
+                placeholder="在此输入需要润色的提示词或文本…&#10;&#10;例如：帮我写一篇关于护肤品的小红书文案，要显得有品位"
+                oninput="onInputChange()" rows="5"></textarea>
+      <div class="editor-char-count">
+        <span id="inputCount">0</span>/5000字
+        <span id="sensitiveWarning" style="display:none;margin-left:8px;font-size:11px;background:rgba(168,230,207,0.3);padding:2px 8px;border-radius:20px">检测到不当词汇</span>
+      </div>
+    </div>
+
+    <!-- 润色按钮 -->
+    <div class="polish-btn-bar">
+      <button class="btn btn-primary btn-block btn-lg tap-feedback" id="polishBtn" onclick="doPolish()">
+        <svg style="width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2" viewBox="0 0 24 24">
+          <path d="M12 2L9 9H2l6 4.5-2.5 7.5L12 16.5 18.5 21 16 13.5 22 9h-7z"/>
+        </svg>
+        开始润色
+      </button>
+    </div>
+
+    <!-- 结果区 -->
+    <div style="padding:0 16px 10px">
+      <div style="font-size:13px;font-weight:700;color:var(--text-hint);margin-bottom:8px">润色结果</div>
+      <div class="result-area" id="resultArea">
+        <div class="result-placeholder" id="resultPlaceholder">
+          <svg class="placeholder-svg" viewBox="0 0 24 24">
+            <path d="M12 2L9 9H2l6 4.5-2.5 7.5L12 16.5 18.5 21 16 13.5 22 9h-7z"/>
+          </svg>
+          <span>润色结果将显示在这里</span>
+        </div>
+        <div class="result-text" id="resultText" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- 结果操作 -->
+    <div id="resultActions" style="padding:0 16px 12px;display:none">
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <button class="btn btn-primary tap-feedback" style="flex:1" onclick="copyResult()">复制结果</button>
+        <button class="btn btn-outline tap-feedback" style="flex:1" onclick="sendToEditor()">发送编辑器</button>
+      </div>
+      <button class="btn btn-outline btn-block tap-feedback" onclick="rePolish()">重新润色</button>
+    </div>
+
+    <!-- 对比视图 -->
+    <div id="compareSection" style="display:none">
+      <div style="padding:0 16px 6px;font-size:13px;font-weight:700;color:var(--text-hint)">原文 vs 润色对比</div>
+      <div class="compare-wrap">
+        <div class="compare-box">
+          <div class="compare-box-title">原文</div>
+          <div class="compare-box-text" id="compareOriginal"></div>
+        </div>
+        <div class="compare-box" style="border-color:var(--border-pink)">
+          <div class="compare-box-title" style="color:var(--primary)">润色后</div>
+          <div class="compare-box-text" id="compareResult"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 会员促销（非会员显示） -->
+    <div id="memberBanner" style="background:var(--bg-rose);border:1.5px solid var(--border-pink);border-radius:var(--radius);margin:0 16px 16px;padding:14px;cursor:pointer;display:none" class="tap-feedback" onclick="APP.navigate('vip.html')">
+      <div style="font-size:14px;font-weight:700;color:var(--text-main);margin-bottom:4px">开通会员 · 无限使用润色功能</div>
+      <div style="font-size:12px;color:var(--text-hint)">无广告 · 无次数限制 · 首月仅¥3.9</div>
+    </div>
+
+    <!-- 合规底部 -->
+    <div class="compliance-footer">
+      <a href="disclaimer.html">《免责声明》</a>
+      <a href="privacy.html">《隐私政策》</a>
+      <a href="rules.html">《使用规则》</a>
+    </div>
+  </div>
+
+  <!-- 底部TabBar -->
+  <div class="tabbar">
+    <div class="tab-item" data-page="home"><div class="tab-icon-wrap"><svg class="tab-svg" viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg></div><div class="tab-label">首页</div></div>
+    <div class="tab-item" data-page="search"><div class="tab-icon-wrap"><svg class="tab-svg" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg></div><div class="tab-label">模板库</div></div>
+    <div class="tab-item" data-page="editor"><div class="tab-icon-wrap"><svg class="tab-svg" viewBox="0 0 24 24"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></div><div class="tab-label">编辑器</div></div>
+    <div class="tab-item active" data-page="polish"><div class="tab-icon-wrap"><svg class="tab-svg" viewBox="0 0 24 24"><path d="M12 2L9 9H2l6 4.5-2.5 7.5L12 16.5 18.5 21 16 13.5 22 9h-7z"/></svg></div><div class="tab-label">AI润色</div></div>
+    <div class="tab-item" data-page="profile"><div class="tab-icon-wrap"><svg class="tab-svg" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div><div class="tab-label">我的</div></div>
+  </div>
+
+  <script src="../data/templates.js"></script>
+  <script src="../js/app.js"></script>
+  <script>
+    let currentStyle = 'simple';
+    let currentResult = '';
+    let originalText = '';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initTabBar('polish');
+      initBackBtn();
+      updateUsageDisplay();
+
+      // 检查导入内容
+      const imported = localStorage.getItem('polish_import');
+      if (imported) {
+        document.getElementById('polishInput').value = imported;
+        localStorage.removeItem('polish_import');
+        onInputChange();
+      }
+    });
+
+    function setStyle(style) {
+      currentStyle = style;
+      document.querySelectorAll('.style-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.style === style);
+      });
+    }
+
+    function onInputChange() {
+      const content = document.getElementById('polishInput').value;
+      document.getElementById('inputCount').textContent = content.length;
+      const sensitive = APP.checkSensitive(content);
+      document.getElementById('sensitiveWarning').style.display = sensitive ? 'inline' : 'none';
+    }
+
+    function updateUsageDisplay() {
+      const isMember = APP.member.isActive();
+      const remaining = APP.polishUsage.getRemaining();
+
+      if (isMember) {
+        document.getElementById('usageCount').textContent = '无限制';
+        document.getElementById('usageSuffix').textContent = '';
+        document.getElementById('adBtnWrap').style.display = 'none';
+        document.getElementById('memberBanner').style.display = 'none';
+      } else {
+        document.getElementById('usageCount').textContent = remaining === Infinity ? '3' : remaining;
+        document.getElementById('usageSuffix').textContent = '次';
+        // 次数用完才显示看广告按钮
+        document.getElementById('adBtnWrap').style.display = (remaining <= 0) ? '' : 'none';
+        document.getElementById('memberBanner').style.display = (remaining <= 1) ? '' : 'none';
+      }
+    }
+
+    async function doPolish() {
+      const content = document.getElementById('polishInput').value.trim();
+
+      if (!content) {
+        APP.alert('温馨提示', '请先输入需要润色的内容', '知道了');
+        return;
+      }
+      if (content.length > 5000) {
+        APP.alert('内容过长', '单次润色最多支持5000字，请精简后再试', '知道了');
+        return;
+      }
+      const sensitive = APP.checkSensitive(content);
+      if (sensitive) {
+        APP.toast('内容含不当词汇，请修改后重试');
+        return;
+      }
+
+      const isMember = APP.member.isActive();
+      if (!isMember) {
+        const ok = APP.polishUsage.use();
+        if (!ok) {
+          APP.alert('今日次数已用完', '每日免费3次，可观看广告获取额外次数，或开通会员享无限使用', '知道了');
+          document.getElementById('adBtnWrap').style.display = '';
+          return;
+        }
+      }
+
+      // 加载态
+      const btn = document.getElementById('polishBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="loading-dots"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div> 润色中…';
+
+      document.getElementById('resultPlaceholder').style.display = '';
+      document.getElementById('resultText').style.display = 'none';
+      document.getElementById('resultActions').style.display = 'none';
+      document.getElementById('compareSection').style.display = 'none';
+
+      await new Promise(r => setTimeout(r, 800 + Math.random() * 600));
+
+      const result = APP.polishText(content, currentStyle);
+      currentResult = result;
+      originalText = content;
+
+      document.getElementById('resultText').textContent = result;
+      document.getElementById('resultText').style.display = '';
+      document.getElementById('resultPlaceholder').style.display = 'none';
+      document.getElementById('resultActions').style.display = '';
+      document.getElementById('compareOriginal').textContent = content;
+      document.getElementById('compareResult').textContent = result;
+      document.getElementById('compareSection').style.display = '';
+
+      btn.disabled = false;
+      btn.innerHTML = `<svg style="width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2" viewBox="0 0 24 24"><path d="M12 2L9 9H2l6 4.5-2.5 7.5L12 16.5 18.5 21 16 13.5 22 9h-7z"/></svg>开始润色`;
+
+      APP.stats.recordPolish();
+      updateUsageDisplay();
+      APP.toastSuccess('润色完成');
+    }
+
+    function rePolish() {
+      document.getElementById('compareSection').style.display = 'none';
+      doPolish();
+    }
+
+    async function copyResult() {
+      if (!currentResult) return;
+      const ok = await APP.copyText(currentResult);
+      APP.toast(ok ? '已复制润色结果' : '复制失败，请手动选择');
+    }
+
+    function sendToEditor() {
+      if (!currentResult) return;
+      localStorage.setItem('editor_import', currentResult);
+      APP.navigate('editor.html');
+    }
+
+    function watchAd() {
+      // 广告规则：不自动弹出，用户主动触发，当日最多5次额外
+      if (!APP.adCount.canShow()) {
+        APP.toast('今日广告次数已达上限，明日再试');
+        return;
+      }
+      APP.confirm('观看广告', '观看约15秒广告，可获得1次额外润色机会', '去观看', '取消').then(ok => {
+        if (ok) {
+          APP.adCount.record();
+          APP.toast('广告加载中…', 500);
+          setTimeout(() => {
+            const success = APP.polishUsage.addAdBonus();
+            if (success) {
+              APP.toastSuccess('获得1次润色机会');
+              updateUsageDisplay();
+            }
+          }, 2000);
+        }
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>在线编辑器 - 全域AI提示词</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <style>
+    .draft-section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-hint);
+      padding: 14px 16px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .draft-count-badge {
+      font-size: 11px;
+      background: var(--bg-rose);
+      color: var(--primary-dark);
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+    .char-warning { color: var(--primary) !important; }
+    .ph-item-inline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .ph-chip-edit {
+      background: var(--bg-rose);
+      border: 1px solid var(--border-pink);
+      color: var(--primary-dark);
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      cursor: pointer;
+      flex-shrink: 0;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+    .ph-chip-edit:active { background: var(--primary); color: #fff; }
+    .ph-input-inline {
+      flex: 1;
+      padding: 7px 10px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      outline: none;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+    .ph-input-inline:focus { border-color: var(--primary-light); }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <div class="navbar-back" id="backBtn">
+      <svg class="nav-icon" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </div>
+    <div class="navbar-title">在线编辑器</div>
+    <div style="width:36px"></div>
+  </div>
+
+  <div class="page-content">
+    <div class="editor-wrap">
+      <!-- 存储提示（首次进入） -->
+      <div class="editor-notice" id="storageNotice" style="display:none">
+        <svg style="width:15px;height:15px;stroke:var(--primary);fill:none;stroke-width:2;flex-shrink:0" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span>温馨提示：H5草稿仅保存在当前浏览器，清除缓存或更换设备后将自动丢失</span>
+        <label class="checkbox-wrap" style="margin-left:auto;flex-shrink:0">
+          <input type="checkbox" class="checkbox-input" id="noMoreNotice" onchange="toggleNoticeHide()">
+          <span class="checkbox-box"></span>
+          <span style="white-space:nowrap">不再提示</span>
+        </label>
+      </div>
+
+      <!-- 输入区 -->
+      <div style="font-size:13px;font-weight:700;color:var(--text-hint);margin-bottom:8px">编辑提示词</div>
+      <textarea id="editorInput" class="editor-textarea" 
+                placeholder="在此输入或粘贴提示词内容…&#10;&#10;支持占位符格式：{{角色}} {{主题}} {{风格}}" 
+                oninput="onEditorInput()" rows="8"></textarea>
+      <div class="editor-char-count">
+        <span id="charCount" class="">0</span>/5000字
+        <span id="sensitiveWarn" style="color:var(--text-hint);margin-left:8px;display:none;font-size:11px;background:rgba(168,230,207,0.3);padding:2px 8px;border-radius:20px">检测到不当词汇</span>
+      </div>
+
+      <!-- 占位符区 -->
+      <div id="phSection" style="display:none;margin-top:12px">
+        <div style="font-size:13px;font-weight:700;color:var(--text-hint);margin-bottom:6px">
+          检测到占位符，快速填写：
+        </div>
+        <div id="phItems"></div>
+        <button class="btn btn-outline btn-sm" style="margin-top:4px" onclick="applyPlaceholders()">
+          替换占位符
+        </button>
+      </div>
+
+      <!-- 工具栏 -->
+      <div class="editor-toolbar">
+        <button class="btn btn-primary" onclick="saveDraft()">
+          <svg style="width:15px;height:15px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round" viewBox="0 0 24 24">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
+          </svg>
+          保存草稿
+        </button>
+        <button class="btn btn-outline" onclick="copyEditor()">
+          <svg style="width:15px;height:15px;stroke:var(--primary);fill:none;stroke-width:2;stroke-linecap:round" viewBox="0 0 24 24">
+            <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+          复制
+        </button>
+        <button class="btn btn-outline" onclick="exportTxt()">
+          <svg style="width:15px;height:15px;stroke:var(--primary);fill:none;stroke-width:2;stroke-linecap:round" viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          导出.txt
+        </button>
+        <button class="btn btn-outline" onclick="sendToPolish()">
+          <svg style="width:15px;height:15px;stroke:var(--primary);fill:none;stroke-width:2" viewBox="0 0 24 24">
+            <path d="M12 2L9 9H2l6 4.5-2.5 7.5L12 16.5 18.5 21 16 13.5 22 9h-7z"/>
+          </svg>
+          AI润色
+        </button>
+        <button class="btn btn-outline" onclick="clearEditor()">
+          <svg style="width:15px;height:15px;stroke:var(--primary);fill:none;stroke-width:2;stroke-linecap:round" viewBox="0 0 24 24">
+            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+          </svg>
+          清空
+        </button>
+      </div>
+    </div>
+
+    <!-- 草稿箱 -->
+    <div class="draft-section-title">
+      草稿箱
+      <span class="draft-count-badge" id="draftCountBadge">0/10</span>
+    </div>
+    <div id="draftList" style="padding:0 16px">
+      <!-- 动态渲染 -->
+    </div>
+
+    <!-- 合规底部 -->
+    <div class="compliance-footer">
+      <a href="privacy.html">《隐私政策》</a>
+      <a href="disclaimer.html">《免责声明》</a>
+      <a href="rules.html">《使用规则》</a>
+    </div>
+  </div>
+
+  <!-- 底部TabBar -->
+  <div class="tabbar">
+    <div class="tab-item" data-page="home"><div class="tab-icon-wrap"><svg class="tab-svg" viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg></div><div class="tab-label">首页</div></div>
+    <div class="tab-item" data-page="search"><div class="tab-icon-wrap"><svg class="tab-svg" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg></div><div class="tab-label">模板库</div></div>
+    <div class="tab-item active" data-page="editor"><div class="tab-icon-wrap"><svg class="tab-svg" viewBox="0 0 24 24"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></div><div class="tab-label">编辑器</div></div>
+    <div class="tab-item" data-page="polish"><div class="tab-icon-wrap"><svg class="tab-svg" viewBox="0 0 24 24"><path d="M12 2L9 9H2l6 4.5-2.5 7.5L12 16.5 18.5 21 16 13.5 22 9h-7z"/></svg></div><div class="tab-label">AI润色</div></div>
+    <div class="tab-item" data-page="profile"><div class="tab-icon-wrap"><svg class="tab-svg" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div><div class="tab-label">我的</div></div>
+  </div>
+
+  <!-- 保存草稿弹窗 -->
+  <div class="modal-center-overlay" id="saveDraftModal">
+    <div class="modal-card fade-in">
+      <div class="modal-card-title">保存草稿</div>
+      <div style="margin-bottom:14px">
+        <input type="text" id="draftNameInput" 
+               style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px;outline:none;font-family:inherit"
+               placeholder="草稿名称（可留空）"
+               onfocus="this.style.borderColor='var(--primary-light)'"
+               onblur="this.style.borderColor='var(--border)'">
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeSaveDraftModal()">取消</button>
+        <button class="btn btn-primary" onclick="confirmSaveDraft()">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../data/templates.js"></script>
+  <script src="../js/app.js"></script>
+  <script>
+    let currentDraftId = null;
+    let placeholders = [];
+    let phValues = {};
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initTabBar('editor');
+      initBackBtn();
+
+      // 首次进入显示存储提示
+      const hidden = APP.storage.get(APP.KEYS.EDITOR_NOTICE_HIDDEN, false);
+      if (!hidden) {
+        document.getElementById('storageNotice').style.display = 'flex';
+      }
+
+      // 检查导入内容（来自模板详情/润色页面）
+      const imported = localStorage.getItem('editor_import');
+      if (imported) {
+        document.getElementById('editorInput').value = imported;
+        localStorage.removeItem('editor_import');
+        onEditorInput();
+      }
+
+      // 检查从个人中心加载的草稿
+      const loadDraftId = localStorage.getItem('editor_load_draft');
+      if (loadDraftId && !imported) {
+        localStorage.removeItem('editor_load_draft');
+        const draft = APP.drafts.getAll().find(d => d.id === loadDraftId);
+        if (draft) {
+          document.getElementById('editorInput').value = draft.content;
+          currentDraftId = draft.id;
+          onEditorInput();
+          APP.toastSuccess('已加载草稿：' + draft.name);
+        }
+      }
+
+      renderDrafts();
+    });
+
+    function toggleNoticeHide() {
+      const checked = document.getElementById('noMoreNotice').checked;
+      if (checked) {
+        APP.storage.set(APP.KEYS.EDITOR_NOTICE_HIDDEN, true);
+        setTimeout(() => {
+          document.getElementById('storageNotice').style.display = 'none';
+        }, 800);
+      }
+    }
+
+    function onEditorInput() {
+      const val = document.getElementById('editorInput').value;
+      const count = document.getElementById('charCount');
+      count.textContent = val.length;
+      count.classList.toggle('char-warning', val.length > 4500);
+
+      // 敏感词检测
+      const sensitive = APP.checkSensitive(val);
+      document.getElementById('sensitiveWarn').style.display = sensitive ? 'inline' : 'none';
+
+      // 占位符检测
+      const matches = [...new Set([...val.matchAll(/\{\{([^}]+)\}\}/g)].map(m => m[1]))];
+      placeholders = matches;
+      if (matches.length > 0) {
+        document.getElementById('phSection').style.display = '';
+        renderPlaceholderInputs();
+      } else {
+        document.getElementById('phSection').style.display = 'none';
+      }
+    }
+
+    function renderPlaceholderInputs() {
+      document.getElementById('phItems').innerHTML = placeholders.map(ph => `
+        <div class="ph-item-inline">
+          <span class="ph-chip-edit">{{${escHtml(ph)}}}</span>
+          <input type="text" class="ph-input-inline" placeholder="输入${escHtml(ph)}"
+                 oninput="phValues['${ph}']=this.value">
+        </div>
+      `).join('');
+    }
+
+    function applyPlaceholders() {
+      let val = document.getElementById('editorInput').value;
+      for (const [k, v] of Object.entries(phValues)) {
+        if (v) val = val.replaceAll('{{' + k + '}}', v);
+      }
+      document.getElementById('editorInput').value = val;
+      onEditorInput();
+      APP.toastSuccess('占位符替换完成');
+    }
+
+    async function copyEditor() {
+      const val = document.getElementById('editorInput').value.trim();
+      if (!val) { APP.toast('编辑区无内容'); return; }
+      if (APP.checkSensitive(val)) { APP.toast('内容含不当词汇，请修改后复制'); return; }
+      const ok = await APP.copyText(val);
+      APP.toast(ok ? '已复制到剪贴板' : '复制失败，请手动选择');
+    }
+
+    function exportTxt() {
+      const val = document.getElementById('editorInput').value.trim();
+      if (!val) { APP.toast('编辑区无内容'); return; }
+      if (APP.checkSensitive(val)) { APP.toast('内容含不当词汇，无法导出'); return; }
+      APP.exportTxt(val, '提示词草稿');
+      APP.toastSuccess('已导出为 .txt 文件');
+    }
+
+    function clearEditor() {
+      APP.confirm('清空确认', '确定清空编辑区内容？', '清空', '取消').then(ok => {
+        if (ok) {
+          document.getElementById('editorInput').value = '';
+          onEditorInput();
+          currentDraftId = null;
+        }
+      });
+    }
+
+    function sendToPolish() {
+      const val = document.getElementById('editorInput').value.trim();
+      if (!val) { APP.toast('请先输入内容'); return; }
+      if (APP.checkSensitive(val)) { APP.toast('内容含不当词汇，无法润色'); return; }
+      localStorage.setItem('polish_import', val);
+      APP.navigate('polish.html');
+    }
+
+    function saveDraft() {
+      const val = document.getElementById('editorInput').value.trim();
+      if (!val) { APP.toast('请先输入内容'); return; }
+      if (val.length > 5000) { APP.toast('内容超过5000字，请精简后保存'); return; }
+      document.getElementById('draftNameInput').value = '';
+      document.getElementById('saveDraftModal').classList.add('show');
+    }
+
+    function closeSaveDraftModal() {
+      document.getElementById('saveDraftModal').classList.remove('show');
+    }
+
+    function confirmSaveDraft() {
+      const val = document.getElementById('editorInput').value.trim();
+      const name = document.getElementById('draftNameInput').value.trim() || val.substring(0, 20) + '…';
+      const ok = APP.drafts.save({
+        id: currentDraftId || null,
+        name,
+        content: val,
+      });
+      closeSaveDraftModal();
+      if (ok) {
+        APP.toastSuccess('草稿已保存');
+        renderDrafts();
+      }
+    }
+
+    function renderDrafts() {
+      const list = document.getElementById('draftList');
+      const drafts = APP.drafts.getAll();
+      document.getElementById('draftCountBadge').textContent = `${drafts.length}/10`;
+
+      if (drafts.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state" style="padding:30px 20px">
+            <svg class="empty-svg" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <div class="empty-title">暂无草稿</div>
+            <div class="empty-desc">编辑后点击「保存草稿」即可</div>
+          </div>
+        `;
+        return;
+      }
+
+      list.innerHTML = drafts.map(d => `
+        <div class="draft-item fade-in">
+          <div class="draft-info">
+            <div class="draft-name">${escHtml(d.name)}</div>
+            <div class="draft-preview">${escHtml(d.content.substring(0, 40))}…</div>
+            <div class="draft-time">${APP.formatTime(d.updatedAt)}</div>
+          </div>
+          <div class="draft-actions">
+            <button class="action-btn tap-feedback" title="加载草稿" onclick="loadDraft('${d.id}')">
+              <svg class="action-btn-svg" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </button>
+            <button class="action-btn tap-feedback" title="删除草稿" onclick="deleteDraft('${d.id}')">
+              <svg class="action-btn-svg" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function loadDraft(draftId) {
+      const draft = APP.drafts.getAll().find(d => d.id === draftId);
+      if (!draft) return;
+      document.getElementById('editorInput').value = draft.content;
+      currentDraftId = draft.id;
+      onEditorInput();
+      APP.toastSuccess('已加载草稿');
+      // 滚动到编辑区
+      document.getElementById('editorInput').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function deleteDraft(draftId) {
+      APP.confirm('删除草稿', '确定删除这条草稿？删除后无法恢复', '删除', '取消').then(ok => {
+        if (ok) {
+          APP.drafts.delete(draftId);
+          if (currentDraftId === draftId) currentDraftId = null;
+          renderDrafts();
+          APP.toast('已删除');
+        }
+      });
+    }
+  </script>
+</body>
+</html>

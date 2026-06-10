@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#FF9EB1">
+  <title>全域AI提示词 - 找词写词改词用词全搞定</title>
+  <meta name="description" content="AI提示词一站式工具，海量分类模板库，在线编辑、AI润色，开箱即用">
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    /* 首页专属样式 */
+    .home-stats-row {
+      display: flex;
+      gap: 0;
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      margin: 12px 16px 0;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .stat-item {
+      flex: 1;
+      text-align: center;
+      padding: 14px 8px;
+    }
+    .stat-item:not(:last-child) { border-right: 1px solid var(--border); }
+    .stat-num { font-size: 20px; font-weight: 800; color: var(--primary); line-height: 1; }
+    .stat-label { font-size: 11px; color: var(--text-hint); margin-top: 3px; }
+    .notice-scroll {
+      background: var(--bg-rose);
+      padding: 8px 16px;
+      font-size: 12px;
+      color: var(--text-hint);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow: hidden;
+      margin: 0 16px 4px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-pink);
+    }
+    .notice-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--primary);
+      flex-shrink: 0;
+      animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; } 50% { opacity: 0.4; }
+    }
+  </style>
+</head>
+<body>
+  <!-- 顶部导航 -->
+  <div class="navbar">
+    <div style="width:36px"></div>
+    <div class="navbar-title">全域AI提示词</div>
+    <div class="navbar-action" onclick="APP.navigate('pages/profile.html')" title="个人中心">
+      <!-- 用户图标线性SVG -->
+      <svg class="nav-icon" viewBox="0 0 24 24">
+        <circle cx="12" cy="8" r="4"/>
+        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- 主内容 -->
+  <div class="page-content">
+
+    <!-- 数据统计行 -->
+    <div class="home-stats-row">
+      <div class="stat-item">
+        <div class="stat-num" id="bannerTemplateCount">200+</div>
+        <div class="stat-label">精选模板</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">9</div>
+        <div class="stat-label">行业分类</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">8w+</div>
+        <div class="stat-label">累计使用</div>
+      </div>
+    </div>
+
+    <!-- 通栏活动横幅 -->
+    <div id="promoBanner" class="promo-banner" onclick="APP.navigate('pages/vip.html')">
+      <div class="promo-info">
+        <div class="promo-title">新用户专享  首月仅¥3.9</div>
+        <div class="promo-sub">解锁全部高阶模板 · 无限AI润色</div>
+      </div>
+      <div class="promo-btn">立即开通</div>
+    </div>
+
+    <!-- 跑马灯公告 -->
+    <div class="notice-scroll" style="margin-top:6px">
+      <div class="notice-dot"></div>
+      <span id="noticeText">持续更新中 · 最新职场提效模板已上线，快来体验！</span>
+    </div>
+
+    <!-- 核心功能入口 2×2 -->
+    <div class="section-head">
+      <div class="section-head-title">核心功能</div>
+    </div>
+    <div class="feature-grid">
+      <!-- 模板库 -->
+      <div class="feature-card tap-feedback" onclick="APP.navigate('pages/search.html')">
+        <div class="fc-icon-wrap">
+          <svg class="fc-icon-svg" viewBox="0 0 24 24">
+            <path d="M4 6h16M4 10h16M4 14h10"/>
+            <circle cx="17" cy="17" r="3"/>
+            <path d="m21 21-1.5-1.5"/>
+          </svg>
+        </div>
+        <div class="fc-title">模板词库</div>
+        <div class="fc-desc">9大分类 200+精选提示词，一键复制即用</div>
+      </div>
+      <!-- 在线编辑器 -->
+      <div class="feature-card tap-feedback" onclick="APP.navigate('pages/editor.html')">
+        <div class="fc-icon-wrap">
+          <svg class="fc-icon-svg" viewBox="0 0 24 24">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+        </div>
+        <div class="fc-title">在线编辑</div>
+        <div class="fc-desc">编辑、替换占位符，草稿随时本地保存</div>
+      </div>
+      <!-- AI润色 -->
+      <div class="feature-card tap-feedback" onclick="APP.navigate('pages/polish.html')">
+        <div class="fc-icon-wrap">
+          <svg class="fc-icon-svg" viewBox="0 0 24 24">
+            <path d="M12 2L9 9H2l6 4.5-2.5 7.5L12 16.5 18.5 21 16 13.5 22 9h-7z"/>
+          </svg>
+        </div>
+        <div class="fc-title">智能润色</div>
+        <div class="fc-desc">4种风格一键优化，让提示词更精准</div>
+      </div>
+      <!-- 会员权益 -->
+      <div class="feature-card tap-feedback" onclick="APP.navigate('pages/vip.html')">
+        <div class="fc-icon-wrap">
+          <svg class="fc-icon-svg" viewBox="0 0 24 24">
+            <path d="M2 20l3-10 4 5 3-8 3 8 4-5 3 10H2z"/>
+          </svg>
+        </div>
+        <div class="fc-title">会员权益</div>
+        <div class="fc-desc">首月仅¥3.9，解锁全部高阶内容</div>
+      </div>
+    </div>
+
+    <!-- 全部分类 -->
+    <div class="section-head">
+      <div class="section-head-title">全部分类</div>
+      <div class="section-head-more tap-feedback" onclick="APP.navigate('pages/search.html')">查看全部 ›</div>
+    </div>
+    <div class="cat-grid" id="catGrid"></div>
+
+    <!-- 本周热门 -->
+    <div class="section-head">
+      <div class="section-head-title">本周热门</div>
+      <div class="section-head-more tap-feedback" onclick="APP.navigate('pages/search.html?sort=hot')">更多 ›</div>
+    </div>
+    <div id="hotList"></div>
+
+    <!-- Banner广告位（仅列表底部，不遮挡内容） -->
+    <div class="ad-banner">
+      <span class="ad-tag">广告</span>
+      <span class="ad-text">AI生产力工具推荐 · 效率提升10倍</span>
+      <span class="ad-arrow">›</span>
+    </div>
+
+    <!-- 合规底部 -->
+    <div class="compliance-footer">
+      <div style="margin-bottom:4px">© 2026 全域AI提示词工具</div>
+      <div>
+        <a href="pages/privacy.html">《隐私政策》</a>
+        <a href="pages/disclaimer.html">《免责声明》</a>
+        <a href="pages/rules.html">《使用规则》</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部TabBar -->
+  <div class="tabbar">
+    <div class="tab-item active" data-page="home">
+      <div class="tab-icon-wrap">
+        <svg class="tab-svg" viewBox="0 0 24 24">
+          <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/>
+          <path d="M9 21V12h6v9"/>
+        </svg>
+      </div>
+      <div class="tab-label">首页</div>
+    </div>
+    <div class="tab-item" data-page="search">
+      <div class="tab-icon-wrap">
+        <svg class="tab-svg" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="8" height="8" rx="1"/>
+          <rect x="13" y="3" width="8" height="8" rx="1"/>
+          <rect x="3" y="13" width="8" height="8" rx="1"/>
+          <rect x="13" y="13" width="8" height="8" rx="1"/>
+        </svg>
+      </div>
+      <div class="tab-label">模板库</div>
+    </div>
+    <div class="tab-item" data-page="editor">
+      <div class="tab-icon-wrap">
+        <svg class="tab-svg" viewBox="0 0 24 24">
+          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+        </svg>
+      </div>
+      <div class="tab-label">编辑器</div>
+    </div>
+    <div class="tab-item" data-page="polish">
+      <div class="tab-icon-wrap">
+        <svg class="tab-svg" viewBox="0 0 24 24">
+          <path d="M12 2L9 9H2l6 4.5-2.5 7.5L12 16.5 18.5 21 16 13.5 22 9h-7z"/>
+        </svg>
+      </div>
+      <div class="tab-label">AI润色</div>
+    </div>
+    <div class="tab-item" data-page="profile">
+      <div class="tab-icon-wrap">
+        <svg class="tab-svg" viewBox="0 0 24 24">
+          <circle cx="12" cy="8" r="4"/>
+          <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+        </svg>
+      </div>
+      <div class="tab-label">我的</div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="data/templates.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // 分类SVG图标映射（ID必须与templates.js中的categoryId一致）
+    const CAT_ICONS = {
+      'office': '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
+      'copywriting': '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+      'video': '<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>',
+      'ecommerce': '<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>',
+      'painting': '<circle cx="13.5" cy="6.5" r="2.5"/><path d="M22 2L11 13"/><path d="M2 22l10-10"/><path d="M5.5 17.5L8 20l3.5-3.5"/>',
+      'coding': '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
+      'education': '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
+      'life': '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>',
+      'business': '<path d="M2 20l3-10 4 5 3-8 3 8 4-5 3 10H2z"/>'
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initTabBar('home');
+      renderCatGrid();
+      renderHotList();
+      updateBannerStats();
+      checkMemberPromo();
+    });
+
+    function getCatIconSVG(catId) {
+      const paths = CAT_ICONS[catId] || CAT_ICONS['content'];
+      return `<svg style="width:22px;height:22px;stroke:#FF9EB1;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24">${paths}</svg>`;
+    }
+
+    function renderCatGrid() {
+      const grid = document.getElementById('catGrid');
+      const cats = TEMPLATE_DB.categories;
+      const countByCat = {};
+      TEMPLATE_DB.templates.forEach(t => {
+        countByCat[t.categoryId] = (countByCat[t.categoryId] || 0) + 1;
+      });
+      grid.innerHTML = cats.map(cat => `
+        <div class="cat-card tap-feedback" onclick="APP.navigate('pages/search.html', {cat:'${cat.id}'})">
+          <div class="cat-card-icon-wrap">
+            ${getCatIconSVG(cat.id)}
+          </div>
+          <div class="cat-card-name">${cat.name}</div>
+          <div class="cat-card-count">${countByCat[cat.id] || 0}个模板</div>
+        </div>
+      `).join('');
+    }
+
+    function renderHotList() {
+      const container = document.getElementById('hotList');
+      const hot = [...TEMPLATE_DB.templates]
+        .sort((a, b) => (b.useCount + b.likes * 2) - (a.useCount + a.likes * 2))
+        .slice(0, 8);
+      
+      container.innerHTML = hot.map((t, i) => {
+        const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-other';
+        return `
+          <div class="hot-card tap-feedback" onclick="openTemplateDetail(${t.id})">
+            <div class="hot-rank ${rankClass}">${i + 1}</div>
+            <div class="hot-info">
+              <div class="hot-title">${escHtml(t.title)}</div>
+              <div class="hot-meta">${escHtml(t.categoryName)} · ${formatNum(t.useCount)}次使用</div>
+            </div>
+            <div class="hot-copy tap-feedback" onclick="handleCopy(${t.id}, event)">复制</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateBannerStats() {
+      const el = document.getElementById('bannerTemplateCount');
+      if (el) el.textContent = TEMPLATE_DB.templates.length + '+';
+    }
+
+    function checkMemberPromo() {
+      if (APP.member.isActive()) {
+        const el = document.getElementById('promoBanner');
+        if (el) el.style.display = 'none';
+      }
+    }
+
+    function escHtml(s) {
+      return (s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+  </script>
+</body>
+</html>

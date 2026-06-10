@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>个人中心 - 全域AI提示词</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <style>
+    .tab-section {
+      display: flex;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      padding: 0 16px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .tab-section::-webkit-scrollbar { display: none; }
+    .section-tab {
+      padding: 12px 14px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-hint);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: all 0.18s;
+    }
+    .section-tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+    .tab-panel { display: none; padding: 14px 16px; }
+    .tab-panel.active { display: block; }
+    .stat-block {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      margin-bottom: 12px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0;
+    }
+    .stat-col { text-align: center; }
+    .stat-col:not(:last-child) { border-right: 1px solid var(--border); }
+    .stat-col-num { font-size: 22px; font-weight: 800; color: var(--primary); }
+    .stat-col-label { font-size: 12px; color: var(--text-hint); margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <div style="width:36px"></div>
+    <div class="navbar-title">个人中心</div>
+    <div style="width:36px"></div>
+  </div>
+
+  <!-- 用户头像区 -->
+  <div class="profile-header">
+    <div class="avatar">
+      <svg class="avatar-svg" viewBox="0 0 24 24">
+        <circle cx="12" cy="8" r="4"/>
+        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+      </svg>
+    </div>
+    <div class="profile-name" id="profileName">游客用户</div>
+    <div class="profile-sub" id="profileSub">登录后可同步收藏与历史</div>
+    <div id="memberBadge" style="display:none">
+      <div class="member-badge">
+        <svg style="width:13px;height:13px;fill:#7B3F00;stroke:none" viewBox="0 0 24 24"><path d="M2 20l3-10 4 5 3-8 3 8 4-5 3 10H2z"/></svg>
+        会员用户
+      </div>
+    </div>
+  </div>
+
+  <!-- 统计快览 -->
+  <div class="profile-stats">
+    <div class="profile-stat" onclick="switchTab('collections')">
+      <div class="profile-stat-num" id="collectCount">0</div>
+      <div class="profile-stat-label">收藏</div>
+    </div>
+    <div class="profile-stat" onclick="switchTab('drafts')">
+      <div class="profile-stat-num" id="draftCount">0</div>
+      <div class="profile-stat-label">草稿</div>
+    </div>
+    <div class="profile-stat" onclick="switchTab('history')">
+      <div class="profile-stat-num" id="historyCount">0</div>
+      <div class="profile-stat-label">历史</div>
+    </div>
+  </div>
+
+  <div class="page-content" style="padding-top:0">
+
+    <!-- 菜单快速操作 -->
+    <div class="menu-section" style="margin-bottom:14px">
+      <div class="menu-item tap-feedback" onclick="APP.navigate('vip.html')">
+        <div class="menu-icon">
+          <svg class="menu-icon-svg" viewBox="0 0 24 24"><path d="M2 20l3-10 4 5 3-8 3 8 4-5 3 10H2z"/></svg>
+        </div>
+        <div class="menu-text">
+          <div class="menu-label">开通/续费会员</div>
+          <div class="menu-desc" id="memberDesc">首月仅¥3.9，解锁全部高阶内容</div>
+        </div>
+        <svg class="menu-arrow-svg" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="menu-item tap-feedback" onclick="APP.navigate('search.html')">
+        <div class="menu-icon">
+          <svg class="menu-icon-svg" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>
+        </div>
+        <div class="menu-text">
+          <div class="menu-label">浏览模板库</div>
+          <div class="menu-desc">200+精选提示词，持续更新</div>
+        </div>
+        <svg class="menu-arrow-svg" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="menu-item tap-feedback" onclick="APP.navigate('editor.html')">
+        <div class="menu-icon">
+          <svg class="menu-icon-svg" viewBox="0 0 24 24"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+        </div>
+        <div class="menu-text">
+          <div class="menu-label">在线编辑器</div>
+          <div class="menu-desc">草稿箱 · 占位符替换 · 导出TXT</div>
+        </div>
+        <svg class="menu-arrow-svg" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+
+    <!-- 内容分区Tab -->
+    <div class="tab-section" id="tabSection">
+      <div class="section-tab active" data-tab="collections" onclick="switchTab('collections')">我的收藏</div>
+      <div class="section-tab" data-tab="drafts" onclick="switchTab('drafts')">我的草稿</div>
+      <div class="section-tab" data-tab="history" onclick="switchTab('history')">使用历史</div>
+      <div class="section-tab" data-tab="stats" onclick="switchTab('stats')">使用统计</div>
+    </div>
+
+    <!-- 收藏 -->
+    <div class="tab-panel active" id="panel-collections">
+      <div id="collectList"></div>
+    </div>
+
+    <!-- 草稿 -->
+    <div class="tab-panel" id="panel-drafts">
+      <div id="draftList"></div>
+    </div>
+
+    <!-- 历史 -->
+    <div class="tab-panel" id="panel-history">
+      <div id="historyList"></div>
+    </div>
+
+    <!-- 统计 -->
+    <div class="tab-panel" id="panel-stats">
+      <div class="stat-block">
+        <div class="stat-col">
+          <div class="stat-col-num" id="statCopies">0</div>
+          <div class="stat-col-label">累计复制</div>
+        </div>
+        <div class="stat-col">
+          <div class="stat-col-num" id="statPolish">0</div>
+          <div class="stat-col-label">润色次数</div>
+        </div>
+        <div class="stat-col">
+          <div class="stat-col-num" id="statCollect">0</div>
+          <div class="stat-col-label">收藏数量</div>
+        </div>
+      </div>
+      <div style="font-size:13px;color:var(--text-hint);text-align:center;padding:16px;background:var(--bg-rose);border-radius:var(--radius-sm)">
+        数据仅保存在本地浏览器，清除缓存后将重置
+      </div>
+    </div>
+
+    <!-- 合规底部 -->
+    <div class="compliance-footer">
+      <a href="privacy.html">《隐私政策》</a>
+      <a href="disclaimer.html">《免责声明》</a>
+      <a href="rules.html">《使用规则》</a>
+    </div>
+  </div>
+
+  <!-- 底部TabBar -->
+  <div class="tabbar">
+    <div class="tab-item" data-page="home"><div class="tab-icon-wrap"><svg class="tab-svg" viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg></div><div class="tab-label">首页</div></div>
+    <div class="tab-item" data-page="search"><div class="tab-icon-wrap"><svg class="tab-svg" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg></div><div class="tab-label">模板库</div></div>
+    <div class="tab-item" data-page="editor"><div class="tab-icon-wrap"><svg class="tab-svg" viewBox="0 0 24 24"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></div><div class="tab-label">编辑器</div></div>
+    <div class="tab-item" data-page="polish"><div class="tab-icon-wrap"><svg class="tab-svg" viewBox="0 0 24 24"><path d="M12 2L9 9H2l6 4.5-2.5 7.5L12 16.5 18.5 21 16 13.5 22 9h-7z"/></svg></div><div class="tab-label">AI润色</div></div>
+    <div class="tab-item active" data-page="profile"><div class="tab-icon-wrap"><svg class="tab-svg" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div><div class="tab-label">我的</div></div>
+  </div>
+
+  <script src="../data/templates.js"></script>
+  <script src="../js/app.js"></script>
+  <script>
+    let activeTab = 'collections';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initTabBar('profile');
+      renderHeader();
+      updateCounts();
+      renderCollections();
+    });
+
+    function renderHeader() {
+      const isMember = APP.member.isActive();
+      if (isMember) {
+        const expire = APP.member.getExpireText();
+        document.getElementById('profileSub').textContent = expire || '会员有效期查看中…';
+        document.getElementById('memberBadge').style.display = '';
+        document.getElementById('memberDesc').textContent = expire;
+      }
+    }
+
+    function updateCounts() {
+      document.getElementById('collectCount').textContent = APP.collections.count();
+      document.getElementById('draftCount').textContent = APP.drafts.count();
+      document.getElementById('historyCount').textContent = APP.history.count();
+    }
+
+    function switchTab(tab) {
+      activeTab = tab;
+      document.querySelectorAll('.section-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.tab === tab);
+      });
+      document.querySelectorAll('.tab-panel').forEach(p => {
+        p.classList.toggle('active', p.id === 'panel-' + tab);
+      });
+
+      if (tab === 'collections') renderCollections();
+      else if (tab === 'drafts') renderDrafts();
+      else if (tab === 'history') renderHistory();
+      else if (tab === 'stats') renderStats();
+    }
+
+    function renderCollections() {
+      const ids = APP.collections.getAll();
+      const el = document.getElementById('collectList');
+      if (ids.length === 0) {
+        el.innerHTML = emptyHtml('暂无收藏', '在模板库点击心形图标即可收藏');
+        return;
+      }
+      const templates = ids.map(id => TEMPLATE_DB.templates.find(t => t.id === id)).filter(Boolean);
+      el.innerHTML = `<div class="templates-list" style="padding:0">${templates.map(t => renderTemplateCard(t)).join('')}</div>`;
+    }
+
+    function renderDrafts() {
+      const drafts = APP.drafts.getAll();
+      const el = document.getElementById('draftList');
+      if (drafts.length === 0) {
+        el.innerHTML = emptyHtml('暂无草稿', '在编辑器保存的草稿会显示在这里');
+        return;
+      }
+      el.innerHTML = drafts.map(d => `
+        <div class="draft-item fade-in">
+          <div class="draft-info" onclick="loadDraft('${d.id}')" style="cursor:pointer">
+            <div class="draft-name">${escHtml(d.name)}</div>
+            <div class="draft-preview">${escHtml(d.content.substring(0,50))}…</div>
+            <div class="draft-time">${APP.formatTime(d.updatedAt)}</div>
+          </div>
+          <div class="draft-actions">
+            <button class="action-btn tap-feedback" title="在编辑器打开" onclick="loadDraft('${d.id}')">
+              <svg class="action-btn-svg" viewBox="0 0 24 24"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+            </button>
+            <button class="action-btn tap-feedback" title="删除" onclick="deleteDraft('${d.id}')">
+              <svg class="action-btn-svg" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderHistory() {
+      const history = APP.history.getAll();
+      const el = document.getElementById('historyList');
+      if (history.length === 0) {
+        el.innerHTML = emptyHtml('暂无历史', '查看或复制模板后会记录在这里');
+        return;
+      }
+      el.innerHTML = history.map(h => {
+        const t = TEMPLATE_DB.templates.find(t => t.id === h.templateId);
+        return `
+          <div class="history-item tap-feedback" onclick="openTemplateDetail(${h.templateId})">
+            <svg class="history-icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <div class="history-info">
+              <div class="history-title">${escHtml(h.templateTitle)}</div>
+              <div class="history-meta">${APP.formatTime(h.timestamp)}</div>
+            </div>
+            <span class="history-reuse">查看</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderStats() {
+      const s = APP.stats.get();
+      document.getElementById('statCopies').textContent = s.totalCopies || 0;
+      document.getElementById('statPolish').textContent = s.polishCount || 0;
+      document.getElementById('statCollect').textContent = APP.collections.count();
+    }
+
+    function loadDraft(draftId) {
+      localStorage.setItem('editor_load_draft', draftId);
+      APP.navigate('editor.html');
+    }
+
+    function deleteDraft(draftId) {
+      APP.confirm('删除草稿', '确定删除这条草稿？删除后无法恢复', '删除', '取消').then(ok => {
+        if (ok) {
+          APP.drafts.delete(draftId);
+          updateCounts();
+          renderDrafts();
+          APP.toast('已删除');
+        }
+      });
+    }
+
+    function emptyHtml(title, desc) {
+      return `
+        <div class="empty-state">
+          <svg class="empty-svg" viewBox="0 0 24 24">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="12" y1="18" x2="12" y2="12"/>
+            <line x1="9" y1="15" x2="15" y2="15"/>
+          </svg>
+          <div class="empty-title">${title}</div>
+          <div class="empty-desc">${desc}</div>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

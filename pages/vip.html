@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>开通会员 - 全域AI提示词</title>
+  <link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+  <div class="navbar">
+    <div class="navbar-back" id="backBtn">
+      <svg class="nav-icon" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </div>
+    <div class="navbar-title">会员权益</div>
+    <div style="width:36px"></div>
+  </div>
+
+  <div class="page-content-no-tab">
+    <!-- 会员头图 -->
+    <div class="vip-header">
+      <div class="vip-crown-wrap">
+        <svg class="vip-crown-svg" viewBox="0 0 24 24"><path d="M2 20l3-10 4 5 3-8 3 8 4-5 3 10H2z"/></svg>
+      </div>
+      <div class="vip-title">全域AI提示词会员</div>
+      <div class="vip-sub">解锁全部高阶模板 · 无限AI润色 · 无广告</div>
+    </div>
+
+    <div class="vip-perks">
+      <!-- 权益列表 -->
+      <div class="perk-list">
+        <div class="perk-item">
+          <svg class="perk-icon-svg" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>
+          全部高阶模板
+        </div>
+        <div class="perk-item">
+          <svg class="perk-icon-svg" viewBox="0 0 24 24"><path d="M12 2L9 9H2l6 4.5-2.5 7.5L12 16.5 18.5 21 16 13.5 22 9h-7z"/></svg>
+          无限AI润色
+        </div>
+        <div class="perk-item">
+          <svg class="perk-icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+          无广告干扰
+        </div>
+        <div class="perk-item">
+          <svg class="perk-icon-svg" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          优先获取新模板
+        </div>
+      </div>
+
+      <!-- 首月特惠卡片 -->
+      <div id="firstMonthCard" class="first-month-card tap-feedback" onclick="selectPlan('first_month')">
+        <div class="fm-info">
+          <div class="fm-title">新用户首月特惠</div>
+          <div class="fm-sub">每个账号仅限享受1次</div>
+          <span class="fm-badge">限时特惠</span>
+        </div>
+        <div>
+          <div class="fm-price">¥3.9<span>/月</span></div>
+        </div>
+      </div>
+
+      <!-- 套餐卡片 -->
+      <div style="font-size:13px;font-weight:700;color:var(--text-hint);margin-bottom:10px">更多套餐</div>
+      <div class="pricing-cards" id="pricingCards">
+        <div class="pricing-card tap-feedback" data-plan="monthly" onclick="selectPlan('monthly')">
+          <div class="pricing-radio"><div class="pricing-radio-dot"></div></div>
+          <div class="pricing-info">
+            <div class="pricing-name">月度会员</div>
+            <div class="pricing-desc">按月订阅，随时续费</div>
+          </div>
+          <div class="pricing-price">
+            <div class="price-num">¥9.9</div>
+            <div class="price-unit">/月</div>
+          </div>
+        </div>
+
+        <div class="pricing-card selected tap-feedback" data-plan="quarterly" onclick="selectPlan('quarterly')">
+          <div class="recommended-tag">推荐</div>
+          <div class="pricing-radio"><div class="pricing-radio-dot"></div></div>
+          <div class="pricing-info">
+            <div class="pricing-name">季度会员</div>
+            <div class="pricing-desc">相当于¥8.6/月</div>
+          </div>
+          <div class="pricing-price">
+            <div class="price-num">¥25.9</div>
+            <div class="price-unit">/季</div>
+            <div class="price-original">¥29.7</div>
+          </div>
+        </div>
+
+        <div class="pricing-card tap-feedback" data-plan="yearly" onclick="selectPlan('yearly')">
+          <div class="pricing-radio"><div class="pricing-radio-dot"></div></div>
+          <div class="pricing-info">
+            <div class="pricing-name">年度会员</div>
+            <div class="pricing-desc">相当于¥6.6/月，最划算</div>
+          </div>
+          <div class="pricing-price">
+            <div class="price-num">¥79</div>
+            <div class="price-unit">/年</div>
+            <div class="price-original">¥118.8</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 退款声明（支付按钮上方） -->
+      <div class="vip-refund-notice">
+        本为虚拟服务，非功能故障不予退款，购买前请知悉
+      </div>
+
+      <!-- 支付按钮 -->
+      <button class="btn btn-primary btn-block btn-lg tap-feedback" id="payBtn" onclick="handlePay()">
+        立即开通
+      </button>
+
+      <!-- 协议 -->
+      <div style="text-align:center;font-size:11px;color:var(--text-hint);margin-top:12px;line-height:1.8">
+        开通即同意
+        <a href="rules.html" style="color:var(--primary)">《使用规则》</a>
+        和
+        <a href="privacy.html" style="color:var(--primary)">《隐私政策》</a>
+      </div>
+    </div>
+
+    <!-- 合规底部 -->
+    <div class="compliance-footer" style="border-top:none">
+      <a href="privacy.html">《隐私政策》</a>
+      <a href="disclaimer.html">《免责声明》</a>
+      <a href="rules.html">《使用规则》</a>
+    </div>
+  </div>
+
+  <!-- 支付成功弹窗 -->
+  <div class="modal-center-overlay" id="paySuccessModal">
+    <div class="modal-card fade-in">
+      <div style="text-align:center;margin-bottom:14px">
+        <div style="width:56px;height:56px;border-radius:50%;background:rgba(168,230,207,0.3);display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+          <svg style="width:28px;height:28px;stroke:var(--success-dark);fill:none;stroke-width:2.5;stroke-linecap:round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="modal-card-title">开通成功</div>
+        <div class="modal-card-text" id="paySuccessText">会员权益已生效，尽情使用吧</div>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="onPaySuccess()">开始使用</button>
+    </div>
+  </div>
+
+  <script src="../data/templates.js"></script>
+  <script src="../js/app.js"></script>
+  <script>
+    const PLANS = {
+      first_month: { name: '首月特惠', days: 30, price: 3.9 },
+      monthly:     { name: '月度会员', days: 30, price: 9.9 },
+      quarterly:   { name: '季度会员', days: 90, price: 25.9 },
+      yearly:      { name: '年度会员', days: 365, price: 79 },
+    };
+    let selectedPlan = 'quarterly';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initBackBtn();
+      checkFirstMonthCard();
+      checkCurrentMember();
+    });
+
+    function checkFirstMonthCard() {
+      const used = APP.member.isFirstMonthUsed();
+      const card = document.getElementById('firstMonthCard');
+      if (used) {
+        card.classList.add('used');
+        card.querySelector('.fm-badge').textContent = '已使用';
+        card.querySelector('.fm-badge').style.background = '#CCCCCC';
+        card.onclick = () => APP.toast('首月特惠每账号限享1次');
+      }
+    }
+
+    function checkCurrentMember() {
+      if (APP.member.isActive()) {
+        const expire = APP.member.getExpireText();
+        document.getElementById('payBtn').textContent = `续费会员（${expire}）`;
+      }
+    }
+
+    function selectPlan(plan) {
+      if (plan === 'first_month' && APP.member.isFirstMonthUsed()) {
+        APP.toast('首月特惠每账号限享1次');
+        return;
+      }
+      selectedPlan = plan;
+
+      // 更新UI
+      document.querySelectorAll('.pricing-card').forEach(card => {
+        card.classList.toggle('selected', card.dataset.plan === plan);
+      });
+      const firstCard = document.getElementById('firstMonthCard');
+      firstCard.style.borderColor = (plan === 'first_month') ? 'var(--primary)' : 'var(--border-pink)';
+
+      const p = PLANS[plan];
+      document.getElementById('payBtn').textContent = `立即开通 ¥${p.price}`;
+    }
+
+    function handlePay() {
+      if (selectedPlan === 'first_month' && APP.member.isFirstMonthUsed()) {
+        APP.toast('首月特惠每账号限享1次');
+        return;
+      }
+      const plan = PLANS[selectedPlan];
+      // 模拟支付流程（真实接入微信支付SDK时替换此逻辑）
+      APP.confirm(
+        `确认开通 ${plan.name}`,
+        `价格 ¥${plan.price}，本为虚拟服务，开通后不予退款，确认支付？`,
+        '确认支付',
+        '取消'
+      ).then(ok => {
+        if (!ok) return;
+        // 模拟支付成功
+        APP.member.activate(selectedPlan, plan.days);
+        if (selectedPlan === 'first_month') APP.member.markFirstMonthUsed();
+        // 显示成功弹窗
+        document.getElementById('paySuccessText').textContent =
+          `${plan.name} 已生效，有效期 ${plan.days} 天，尽情使用吧`;
+        document.getElementById('paySuccessModal').classList.add('show');
+      });
+    }
+
+    function onPaySuccess() {
+      document.getElementById('paySuccessModal').classList.remove('show');
+      APP.navigate('../index.html');
+    }
+  </script>
+</body>
+</html>
